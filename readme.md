@@ -1,3 +1,4 @@
+_**Attribution:** TradeNPC was originally created by Ivaar. Check out the original version [here](https://github.com/Ivaar/Windower-addons/tree/master/TradeNPC)._
 # TradeNPC
 
 Trade an npc up to 8 stacks of items and gil with a single command.
