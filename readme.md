@@ -28,7 +28,7 @@ If you need to exceed the chatlog character limit, you can type the command from
 You can now use TradeNPC to assist further with certain repetitive tasks:
 
 1. **Trade all trust ciphers.** When standing near a Trust Recruiter NPC, you can run `tradenpc cipher` and every cipher in your inventory will be traded and activated.
-2. **Repeat item turn-in quests.** You can add an optional `multi` argument before the item name to indicate that you should keep on trading until you run out of sufficient items. For example, running `tradenpc multi 2 "Bat Wing" Secodiand` will keep on trading two bat wings to Secodiand until you're down to 0 or 1 wings in your inventory.
+2. **Repeat item turn-in quests.** You can add an optional `multi` argument before the item count to indicate that you should keep on trading until you run out of sufficient items. For example, running `tradenpc multi 2 "Bat Wing" Secodiand` will keep on trading two bat wings to Secodiand until you're down to 0 or 1 wings in your inventory.
 
 ### Examples
 
