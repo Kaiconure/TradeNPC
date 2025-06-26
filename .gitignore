@@ -1,0 +1,7 @@
+/data/*
+/settings/*
+!/settings/.*
+/.backup/*
+/.VSCodeCounter/*
+/functions.txt
+/symbols.txt
