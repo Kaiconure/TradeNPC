@@ -5,7 +5,7 @@ packets = require('packets')
 
 _addon.name = 'TradeNPC'
 _addon.author = 'Ivaar'
-_addon.version = '1.2025.0623'
+_addon.version = '1.2025.1119'
 _addon.command = 'tradenpc'
 
 function write_message(format, ...)
@@ -36,6 +36,17 @@ function get_item_res(item)
         end
     end
     return nil
+end
+
+function count_item(inventory, item_id)
+    local count = 0
+    for k, v in ipairs(inventory) do
+        if v.id == item_id and v.count >= 0 and v.status == 0 then
+            count = count + v.count
+        end
+    end
+
+    return count
 end
 
 function find_item(inventory, item_id, count, exclude)
@@ -147,9 +158,17 @@ function doTrades(...)
             if not args[x*2] then
                 break
             end
-            local units = tonumber(args[x*2-1])
+
             local name = windower.convert_auto_trans(args[x*2]):lower()
             local item = get_item_res(name)
+
+            local units = string.lower(args[x*2-1] or '')
+            if item and units == 'all' or units == '*' then
+                units = count_item(inventory, item.id)                
+            else
+                units = tonumber(units)
+            end
+
             if not item or item.flags['Linkshell'] == true then
                 write_message('"%s" not a valid item name: arg %d', name, x*2)
                 return
@@ -158,6 +177,8 @@ function doTrades(...)
                 write_message('Invalid quantity: arg %d', x*2-1)
                 return
             end
+
+            write_message('Item: [%s], Qty: [%d]':format(item.name, units))
             
             while units > 0 do
                 local count = units > item.stack and item.stack or units
