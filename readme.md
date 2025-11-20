@@ -48,3 +48,12 @@ You can now use TradeNPC to assist further with certain repetitive tasks:
 
 //tradenpc all "H. Kindred Crest" Shami
 ```
+
+Note that, as when specifying an exact quantity, you can use "all" for any (or all) items in a trade list.
+
+```
+tradenpc all "H. Kindred Crest" all "S. Kindred Crest" Shami
+```
+
+<img src="https://github.com/user-attachments/assets/92e7eeaf-6261-4e1d-adc4-7bbe8aa4e0f8" />
+
