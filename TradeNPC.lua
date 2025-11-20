@@ -136,8 +136,21 @@ function doTrades(...)
 
     local commands = {}
 
+    local quantity_marker
+    if string.lower(args[1]) == 'all' or args[1] == '*' then
+        quantity_marker = 'All'
+    else
+        quantity_marker = (tonumber(args[1]) or 1) .. 'x'
+    end
+
     if target then
-        write_message('TradeNPC: Target is [%s] (%d / %03X) (%dx [%s])', target.name, target.id, target.index, tonumber(args[1]) or 1, args[2])
+        write_message('TradeNPC: Target is [%s] (%d / %03X) (%s [%s])', 
+            target.name,
+            target.id,
+            target.index,
+            quantity_marker,
+            args[2])
+
         local ind = {}
         local qty = {}
         local start = 1
@@ -150,6 +163,8 @@ function doTrades(...)
             ind[1] = 0
             qty[1] = units
             start = 2
+
+            write_message('Adding %d gil to the trade!':format(units))
         end
         local inventory = windower.ffxi.get_items(0)
         if not inventory then return end
@@ -178,7 +193,7 @@ function doTrades(...)
                 return
             end
 
-            write_message('Item: [%s], Qty: [%d]':format(item.name, units))
+            write_message('Adding %dx [%s] to the trade!':format(units, item.name))
             
             while units > 0 do
                 local count = units > item.stack and item.stack or units
