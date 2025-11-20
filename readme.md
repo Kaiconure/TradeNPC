@@ -12,6 +12,8 @@ Quantities greater than an items stack size are accepted, if you specify too man
 
 For gil CSV and EU decimal mark are optional. e.g. 100000 or 100,000 or 100.000
 
+For items, quantity can be `all` or `*` to try and trade all instances of a given item found in your inventory.
+
 Accepts auto-translate, short or full item name.
 
 If the item name is more than one word you must use quotes or auto-translate.
@@ -43,4 +45,6 @@ You can now use TradeNPC to assist further with certain repetitive tasks:
 //tradenpc cipher
 
 //tradenpc multi 4 "Yagudo Necklace" "Nanaa Mihgo"
+
+//tradenpc all "H. Kindred Crest" Shami
 ```
