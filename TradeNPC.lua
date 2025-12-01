@@ -4,21 +4,40 @@ res_items = require('resources').items
 packets = require('packets')
 
 _addon.name = 'TradeNPC'
-_addon.author = 'Ivaar'
-_addon.version = '1.2025.1119'
+_addon.author = 'Ivaar,Kaiconure'
+_addon.version = '1.2025.1201'
 _addon.command = 'tradenpc'
 
 function write_message(format, ...)
     print(string.format(format, ...))
 end
 
+-- Waits for the player to be idle (status 0)
 function wait_for_idle(min_duration, max_duration)
-    min_duration = math.max(tonumber(min_duration) or 5, 5)
+    min_duration = math.max(tonumber(min_duration) or 1, 1)
     max_duration = math.max(tonumber(max_duration) or 30, 5)
     local sleep_start = os.clock()
     coroutine.sleep(min_duration)
     while 
         windower.ffxi.get_mob_by_target('me').status ~= 0 
+    do
+        if ((os.clock() - sleep_start) > max_duration) then
+            return false
+        end
+        coroutine.sleep(1)
+    end
+
+    return true
+end
+
+-- Waits for the player to be in event status (status 4)
+function wait_for_event(max_duration)
+    min_duration = 1
+    max_duration = math.max(tonumber(max_duration) or 5, 5)
+    local sleep_start = os.clock()
+    coroutine.sleep(min_duration)
+    while 
+        windower.ffxi.get_mob_by_target('me').status ~= 4 
     do
         if ((os.clock() - sleep_start) > max_duration) then
             return false
@@ -144,12 +163,12 @@ function doTrades(...)
     end
 
     if target then
-        write_message('TradeNPC: Target is [%s] (%d / %03X) (%s [%s])', 
+        write_message('TradeNPC: Target is [%s] (%d / %03X)',
             target.name,
             target.id,
             target.index,
-            quantity_marker,
-            args[2])
+            quantity_marker,    -- Ignored
+            args[2])            -- Ignored
 
         local ind = {}
         local qty = {}
@@ -185,30 +204,58 @@ function doTrades(...)
             end
 
             if not item or item.flags['Linkshell'] == true then
-                write_message('"%s" not a valid item name: arg %d', name, x*2)
+                write_message('[%s] not a valid item name: arg %d', name, x*2)
                 return
             end
-            if not units or units < 1 then
+
+            -- We will not validate the actual number of units here. The original implementation would bail here
+            -- if no items were found, but the "all" option would often lead to zero items if the player had none 
+            -- a partcular item. By allowing zero through, we will skip adding that item to the trade and will
+            -- move on. The check added below the for loop will catch the case where nothing is added at all.
+            if not units then
                 write_message('Invalid quantity: arg %d', x*2-1)
                 return
             end
 
-            write_message('Adding %dx [%s] to the trade!':format(units, item.name))
-            
-            while units > 0 do
-                local count = units > item.stack and item.stack or units
-                local index = find_item(inventory, item.id, count, exclude)
-                if not index then
-                    write_message('%s x%s not found in inventory.', item.name, args[x*2-1])
-                    return
+            if units > 0 then
+                write_message('Adding [%s] x%d to the trade!':format(item.name, units))
+                
+                while units > 0 do
+                    local count = units > item.stack and item.stack or units
+                    local index = find_item(inventory, item.id, count, exclude)
+                    if not index then
+                        write_message('Could not find [%s] x%d in your inventory.', item.name, units)
+                        return
+                    end
+                    exclude[index] = true
+                    ind[#ind+1] = index
+                    qty[#qty+1] = count
+                    units = units - count
                 end
-                exclude[index] = true
-                ind[#ind+1] = index
-                qty[#qty+1] = count
-                units = units - count
+            else
+                write_message('Skipping [%s] as quantity is zero.', item.name)
             end
         end
+
+        if #ind == 0 then
+            write_message('No items or gil were added to the trade.')
+            return
+        end
+
         local num = #ind
+
+        -- Limit to first 8 items (plus gil). This would previously result in an error, but now the trade will
+        -- proceed with the first 8 items and a message will be displayed. This will allow the user to just
+        -- attempt the trade again as inventory numbers decrease.
+        if num >= start + 8 then
+            ind = {unpack(ind, 1, start + 7)}
+            qty = {unpack(qty, 1, start + 7)}
+
+            write_message('Too many items were added to the trade, only the first %d will be traded.':format(start + 7))
+
+            num = #ind
+        end
+
         if num > 0 and num < start+8 then
             for x = num, 8 do
                 ind[x+1] = 0
@@ -233,6 +280,7 @@ function doTrades(...)
                 target.name == 'Felmsy' or
                 target.name == 'Pudith'
             then
+                -- These Adoulin Fame NPCs require special handling before they accept trades
                 poke_npc(target)
                 coroutine.sleep(3)
                 tap_key('enter')
@@ -241,9 +289,28 @@ function doTrades(...)
 
             packets.inject(packet)
 
+            if
+                target.name == 'Rolandienne' or
+                target.name == 'Isakoth' or
+                target.name == 'Fhelm Jobeizat' or
+                target.name == 'Eternal Flame'
+            then
+                -- Sparks NPCs require one further interaction after the trade packet is sent
+                coroutine.sleep(3)
+                tap_key('enter')
+            end
+
+            if
+                target.name == 'Shami'
+            then
+                -- For certain NPC's, we need to confirm the trade by pressing enter repeatedly
+                -- until we exit the event state.
+                while wait_for_event(1, 3) do
+                    tap_key('enter')
+                end
+            end
+
 			return true
-        else
-            write_message('Too many items')
         end
     else
         write_message('No target or too far away.')
