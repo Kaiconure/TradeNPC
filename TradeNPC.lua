@@ -188,7 +188,21 @@ function doTrades(...)
         local inventory = windower.ffxi.get_items(0)
         if not inventory then return end
         local exclude = {}
-        for x = start, 9 do
+
+        -- Note: The number of actual items added to the trade is calculated as:
+        --
+        --  num_items = #ind - start
+        --
+        -- That is, it's the number of things we have in our array minus the index
+        -- at which we started adding items. This is to account for gil being added
+        -- in the first slot.
+        --
+        -- The end result is that we will continue allowing items to be added until
+        -- we've filled in all 8 slots -OR- we run out of items to examine.
+        -- 
+        local x = start
+        while #ind - start < 8 do
+            print('item: %s':format(args[x*2] or 'nil'))
             if not args[x*2] then
                 break
             end
@@ -235,6 +249,8 @@ function doTrades(...)
             else
                 write_message('Skipping [%s] as quantity is zero.', item.name)
             end
+
+            x = x + 1
         end
 
         if #ind == 0 then
@@ -301,7 +317,8 @@ function doTrades(...)
             end
 
             if
-                target.name == 'Shami'
+                target.name == 'Shami' or
+                target.name == 'Monisette'
             then
                 -- For certain NPC's, we need to confirm the trade by pressing enter repeatedly
                 -- until we exit the event state.
