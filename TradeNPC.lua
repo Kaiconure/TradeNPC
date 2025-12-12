@@ -5,7 +5,7 @@ packets = require('packets')
 
 _addon.name = 'TradeNPC'
 _addon.author = 'Ivaar,Kaiconure'
-_addon.version = '1.2025.1201'
+_addon.version = '1.2025.1212'
 _addon.command = 'tradenpc'
 
 function write_message(format, ...)
