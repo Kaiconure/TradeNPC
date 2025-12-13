@@ -202,7 +202,6 @@ function doTrades(...)
         -- 
         local x = start
         while #ind - start < 8 do
-            print('item: %s':format(args[x*2] or 'nil'))
             if not args[x*2] then
                 break
             end
