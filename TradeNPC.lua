@@ -339,10 +339,12 @@ local nyzul_equipment = {
     [2194] = true, [2195] = true, [2196] = true,
     [2276] = true, [2277] = true, [2278] = true, [2279] = true,
     [2280] = true, [2281] = true, [2282] = true,
+    [2283] = true, [2284] = true, [2285] = true, [2286] = true,
+
     [9011] = true, [9012] = true, [9013] = true, [9014] = true,
     [9015] = true, [9016] = true, [9017] = true, [9018] = true,
     [9019] = true, [9020] = true, [9021] = true, [9022] = true,
-    [9023] = true, [9024] = true,
+    [9023] = true, [9024] = true, [9025] = true, [9026] = true,
 }
 
 local function trade_nyzul_equipment()
