@@ -32,6 +32,7 @@ You can now use TradeNPC to assist further with certain repetitive tasks:
 
 1. **Trade all trust ciphers.** When standing near a Trust Recruiter NPC, you can run `tradenpc cipher` and every cipher in your inventory will be traded and activated.
 2. **Repeat item turn-in quests.** You can add an optional `multi` argument before the item count to indicate that you should keep on trading until you run out of sufficient items. For example, running `tradenpc multi 2 "Bat Wing" Secodiand` will keep on trading two bat wings to Secodiand until you're down to 0 or 1 wings in your inventory.
+3. **Appraise Nyzul equipment.** Stand near Drahbah and run `tradenpc nyzul` to trade unidentified weapons, armor, and accessories from your main inventory one at a time, including duplicate items and the `+1` versions. Drahbah automatically deducts 500 gil per appraisal. The command waits between trades and stops if an item is not consumed, you have insufficient gil, or Drahbah is out of range. Materials, boxes, and Sortie job earrings are excluded. Items are identified by their appraisal equipment IDs; the addon cannot distinguish which Assault supplied them.
 
 ### Examples
 
@@ -43,6 +44,8 @@ You can now use TradeNPC to assist further with certain repetitive tasks:
 //tradenpc 10,000 gil 24 "fire crystal" 12 "earth crystal" 18 "water crystal" 6 "dark crystal" "Ephemeral Moogle"
 
 //tradenpc cipher
+
+//tradenpc nyzul
 
 //tradenpc multi 4 "Yagudo Necklace" "Nanaa Mihgo"
 

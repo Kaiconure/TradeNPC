@@ -5,7 +5,7 @@ packets = require('packets')
 
 _addon.name = 'TradeNPC'
 _addon.author = 'Ivaar,Kaiconure'
-_addon.version = '1.2025.1212'
+_addon.version = '1.2026.1116'
 _addon.command = 'tradenpc'
 
 function write_message(format, ...)
@@ -333,11 +333,67 @@ function doTrades(...)
     end
 end
 
+-- Explicit appraisal equipment IDs: excludes materials, boxes, and Sortie earrings.
+local nyzul_equipment = {
+    [2190] = true, [2191] = true, [2192] = true, [2193] = true,
+    [2194] = true, [2195] = true, [2196] = true,
+    [2276] = true, [2277] = true, [2278] = true, [2279] = true,
+    [2280] = true, [2281] = true, [2282] = true,
+    [9011] = true, [9012] = true, [9013] = true, [9014] = true,
+    [9015] = true, [9016] = true, [9017] = true, [9018] = true,
+    [9019] = true, [9020] = true, [9021] = true, [9022] = true,
+    [9023] = true, [9024] = true,
+}
+
+local function trade_nyzul_equipment()
+    local numTrades = 0
+    while true do
+        local target = find_valid_npc('Drahbah')
+        if not target then
+            write_message('TradeNPC: Drahbah is not nearby.')
+            break
+        end
+
+        local inventory = windower.ffxi.get_items(0)
+        if not inventory then break end
+        local item
+        for _, slot in ipairs(inventory) do
+            if nyzul_equipment[slot.id] and slot.count > 0 and slot.status == 0 then
+                item = res_items[slot.id]
+                if item then break end
+            end
+        end
+        if not item then break end
+        if windower.ffxi.get_items('gil') < 500 then
+            write_message('TradeNPC: Appraisal requires 500 gil; stopping.')
+            break
+        end
+
+        local before = count_item(inventory, item.id)
+        write_message('Appraising [%s]...':format(item.en))
+        if not doTrades(1, item.en, target.name) then break end
+        coroutine.sleep(3)
+        tap_key('enter')
+        if not wait_for_idle() then
+            write_message('TradeNPC: Timed out waiting for appraisal; stopping.')
+            break
+        end
+        inventory = windower.ffxi.get_items(0)
+        if not inventory or count_item(inventory, item.id) >= before then
+            write_message('TradeNPC: Item was not appraised; stopping.')
+            break
+        end
+        numTrades = numTrades + 1
+    end
+    return numTrades
+end
+
 windower.register_event('addon command', function(...)
 	local args = {...}
 	
     local multitrade = false
     local ciphers = false
+    local nyzul = false
     local numTrades = 0
 
     if args[1] == 'multitrade' or args[1] == 'multi' then
@@ -346,9 +402,14 @@ windower.register_event('addon command', function(...)
     elseif args[1] == 'ciphers' or args[1] == 'cipher' then
         ciphers = true
         table.remove(args, 1)
+    elseif args[1] == 'nyzul' then
+        nyzul = true
+        table.remove(args, 1)
     end
 
-    if ciphers then
+    if nyzul then
+        numTrades = trade_nyzul_equipment()
+    elseif ciphers then
         local mobs = windower.ffxi.get_mob_array()
         local target = find_valid_npc('Gondebaud', mobs) or find_valid_npc('Clarion Star', mobs) or find_valid_npc('Wetata', mobs)
 
